@@ -1,3 +1,4 @@
+import { Link } from "react-router-dom";
 import type { Team } from "@domain/entities/Team";
 
 interface TeamCardProps {
@@ -7,31 +8,36 @@ interface TeamCardProps {
 export function TeamCard({ team }: TeamCardProps) {
   return (
     <li style={styles.card}>
-      <span style={styles.name}>{team.name}</span>
-      <span style={styles.id}>#{team.id.slice(0, 8)}</span>
+      <Link to={`/times/${team.id}`} style={styles.link}>
+        <span style={styles.name}>{team.name}</span>
+        <span style={styles.arrow}>→</span>
+      </Link>
     </li>
   );
 }
 
 const styles: Record<string, React.CSSProperties> = {
   card: {
+    listStyle: "none",
+    background: "#1e1e2e",
+    borderRadius: "8px",
+    border: "1px solid #313244",
+    transition: "border-color 0.15s",
+  },
+  link: {
     display: "flex",
     justifyContent: "space-between",
     alignItems: "center",
     padding: "1rem 1.5rem",
-    background: "#1e1e2e",
-    borderRadius: "8px",
-    border: "1px solid #313244",
-    listStyle: "none",
+    textDecoration: "none",
   },
   name: {
     fontSize: "1rem",
     fontWeight: 600,
     color: "#cdd6f4",
   },
-  id: {
-    fontSize: "0.75rem",
-    color: "#6c7086",
-    fontFamily: "monospace",
+  arrow: {
+    fontSize: "0.9rem",
+    color: "#89b4fa",
   },
 };
