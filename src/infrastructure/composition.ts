@@ -6,6 +6,7 @@ import { ApiTeamRepository } from "./repositories/ApiTeamRepository";
 import { ListTeams } from "@application/use_cases/ListTeams";
 import { CreateTeam } from "@application/use_cases/CreateTeam";
 import { GetTeamMatches } from "@application/use_cases/GetTeamMatches";
+import { GetTeamDetail } from "@application/use_cases/GetTeamDetail";
 
 const championshipRepository = new ApiChampionshipRepository("/api");
 const teamRepository = new ApiTeamRepository("/api");
@@ -15,3 +16,4 @@ export const getChampionshipDetail = new GetChampionshipDetail(championshipRepos
 export const listTeams = new ListTeams(teamRepository);
 export const createTeam = new CreateTeam(teamRepository);
 export const getTeamMatches = new GetTeamMatches(teamRepository);
+export const getTeamDetail = new GetTeamDetail(teamRepository);
