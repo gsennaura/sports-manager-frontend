@@ -1,24 +1,37 @@
 import type { ListTeams } from "@application/use_cases/ListTeams";
-import type { CreateTeam } from "@application/use_cases/CreateTeam";
-import { TeamForm } from "@presentation/components/TeamForm";
 import { TeamList } from "@presentation/components/TeamList";
 import { useTeams } from "@presentation/hooks/useTeams";
 
 interface TeamsPageProps {
   listTeams: ListTeams;
-  createTeam: CreateTeam;
 }
 
-export function TeamsPage({ listTeams, createTeam }: TeamsPageProps) {
-  const { teams, loading, error, refetch } = useTeams(listTeams);
+export function TeamsPage({ listTeams }: TeamsPageProps) {
+  const { teams, loading, error } = useTeams(listTeams);
+
+  const byCity = new Map<string, typeof teams>();
+  for (const t of teams) {
+    const city = t.city_name || "–";
+    if (!byCity.has(city)) byCity.set(city, []);
+    byCity.get(city)!.push(t);
+  }
+  const cities = [...byCity.keys()].sort((a, b) => a.localeCompare(b, "pt-BR"));
 
   return (
     <main style={styles.page}>
       <h1 style={styles.title}>Times</h1>
-      <TeamForm createTeam={createTeam} onSuccess={refetch} />
       {loading && <p style={styles.status}>Carregando...</p>}
       {error && <p style={styles.error}>{error}</p>}
-      {!loading && !error && <TeamList teams={teams} />}
+      {!loading && !error && (
+        cities.length === 0
+          ? <p style={styles.status}>Nenhum time encontrado.</p>
+          : cities.map((city) => (
+              <section key={city} style={styles.citySection}>
+                <h2 style={styles.cityTitle}>{city}</h2>
+                <TeamList teams={byCity.get(city)!} />
+              </section>
+            ))
+      )}
     </main>
   );
 }
@@ -34,6 +47,17 @@ const styles: Record<string, React.CSSProperties> = {
     fontWeight: 700,
     color: "#cdd6f4",
     marginBottom: "2rem",
+  },
+  citySection: {
+    marginBottom: "2.5rem",
+  },
+  cityTitle: {
+    fontSize: "1rem",
+    fontWeight: 700,
+    color: "#89b4fa",
+    marginBottom: "0.75rem",
+    paddingBottom: "0.4rem",
+    borderBottom: "1px solid #313244",
   },
   status: {
     color: "#6c7086",

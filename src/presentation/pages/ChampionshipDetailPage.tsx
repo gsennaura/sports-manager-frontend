@@ -129,19 +129,24 @@ function MatchRoundList({
             const hasScore = m.home_score !== null && m.away_score !== null;
             const hasPenalty = hasScore && m.home_penalty_score !== null && m.away_penalty_score !== null;
             return (
-              <div key={m.id} style={styles.matchRow}>
-                <Link to={`/times/${m.home_team_id}`} style={{ ...styles.teamHome, ...styles.teamLink }}>{home}</Link>
-                <div style={styles.scoreBlock}>
-                  <span style={hasScore ? styles.score : styles.scorePending}>
-                    {hasScore ? `${m.home_score} × ${m.away_score}` : "– × –"}
-                  </span>
-                  {hasPenalty && (
-                    <span style={styles.penalty}>
-                      pên: {m.home_penalty_score} × {m.away_penalty_score}
+              <div key={m.id}>
+                <div style={styles.matchRow}>
+                  <Link to={`/times/${m.home_team_id}`} style={{ ...styles.teamHome, ...styles.teamLink }}>{home}</Link>
+                  <div style={styles.scoreBlock}>
+                    <span style={hasScore ? styles.score : styles.scorePending}>
+                      {hasScore ? `${m.home_score} × ${m.away_score}` : "– × –"}
                     </span>
-                  )}
+                    {hasPenalty && (
+                      <span style={styles.penalty}>
+                        pên: {m.home_penalty_score} × {m.away_penalty_score}
+                      </span>
+                    )}
+                  </div>
+                  <Link to={`/times/${m.away_team_id}`} style={{ ...styles.teamAway, ...styles.teamLink }}>{away}</Link>
                 </div>
-                <Link to={`/times/${m.away_team_id}`} style={{ ...styles.teamAway, ...styles.teamLink }}>{away}</Link>
+                {m.venue_name && (
+                  <div style={styles.venueTag}>📍 {m.venue_name}</div>
+                )}
               </div>
             );
           })}
@@ -401,6 +406,12 @@ const styles: Record<string, React.CSSProperties> = {
     whiteSpace: "nowrap" as const,
     display: "block",
     marginTop: "1px",
+  },
+  venueTag: {
+    fontSize: "0.7rem",
+    color: "#45475a",
+    textAlign: "center" as const,
+    paddingBottom: "0.3rem",
   },
   scoreBlock: {
     display: "flex",
