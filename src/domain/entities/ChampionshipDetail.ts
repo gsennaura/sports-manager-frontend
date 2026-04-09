@@ -13,6 +13,7 @@ export interface MatchEntry {
   home_penalty_score: number | null;
   away_penalty_score: number | null;
   match_date: string | null;
+  venue_name: string | null;
 }
 
 export interface StandingEntry {

@@ -1,10 +1,13 @@
 import { useState, useEffect } from "react";
 import { Link, useParams } from "react-router-dom";
 import type { GetTeamMatches } from "@application/use_cases/GetTeamMatches";
+import type { GetTeamDetail } from "@application/use_cases/GetTeamDetail";
+import type { Team } from "@domain/entities/Team";
 import type { TeamMatch } from "@domain/entities/TeamMatch";
 
 interface TeamDetailPageProps {
   getTeamMatches: GetTeamMatches;
+  getTeamDetail: GetTeamDetail;
 }
 
 interface SeasonStats {
@@ -16,31 +19,29 @@ interface SeasonStats {
   goalsAgainst: number;
 }
 
-export function TeamDetailPage({ getTeamMatches }: TeamDetailPageProps) {
+export function TeamDetailPage({ getTeamMatches, getTeamDetail }: TeamDetailPageProps) {
   const { id } = useParams<{ id: string }>();
+  const [team, setTeam] = useState<Team | null>(null);
   const [matches, setMatches] = useState<TeamMatch[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
-  const [teamName, setTeamName] = useState<string>("");
 
   useEffect(() => {
     if (!id) return;
     setLoading(true);
     setError(null);
-    getTeamMatches.execute(id).then((data) => {
-      setMatches(data);
-      if (data.length > 0) {
-        const first = data[0];
-        setTeamName(
-          first.home_team_id === id ? first.home_team_name : first.away_team_name
-        );
-      }
+    Promise.all([
+      getTeamDetail.execute(id),
+      getTeamMatches.execute(id),
+    ]).then(([teamData, matchData]) => {
+      setTeam(teamData);
+      setMatches(matchData);
       setLoading(false);
     }).catch((err: unknown) => {
       setError(err instanceof Error ? err.message : "Erro desconhecido.");
       setLoading(false);
     });
-  }, [id, getTeamMatches]);
+  }, [id, getTeamMatches, getTeamDetail]);
 
   // Group by season (year from match_date), unknown dates go to "Sem data"
   const bySeason = new Map<string, TeamMatch[]>();
@@ -60,7 +61,16 @@ export function TeamDetailPage({ getTeamMatches }: TeamDetailPageProps) {
 
       {!loading && !error && (
         <>
-          <h1 style={styles.title}>{teamName || "Time"}</h1>
+          <h1 style={styles.title}>{team?.name || "Time"}</h1>
+
+          {team && (
+            <div style={styles.infoCard}>
+              <InfoRow label="Cidade" value={team.city_name} />
+              {team.venue_name && <InfoRow label="Estádio / Arena" value={team.venue_name} />}
+              {team.president && <InfoRow label="Presidente" value={team.president} />}
+              {team.founded_at && <InfoRow label="Fundação" value={formatDate(team.founded_at)} />}
+            </div>
+          )}
 
           {matches.length === 0 && (
             <p style={styles.empty}>Nenhuma partida encontrada.</p>
@@ -91,6 +101,21 @@ export function TeamDetailPage({ getTeamMatches }: TeamDetailPageProps) {
       )}
     </main>
   );
+}
+
+function InfoRow({ label, value }: { label: string; value: string }) {
+  return (
+    <div style={styles.infoRow}>
+      <span style={styles.infoLabel}>{label}</span>
+      <span style={styles.infoValue}>{value}</span>
+    </div>
+  );
+}
+
+function formatDate(iso: string): string {
+  const d = iso.slice(0, 10).split("-");
+  if (d.length === 3) return `${d[2]}/${d[1]}/${d[0]}`;
+  return iso;
 }
 
 function MatchRow({ match: m, teamId }: { match: TeamMatch; teamId: string }) {
@@ -221,7 +246,33 @@ const styles: Record<string, React.CSSProperties> = {
     fontSize: "1.75rem",
     fontWeight: 700,
     color: "#cdd6f4",
+    marginBottom: "1rem",
+  },
+  infoCard: {
+    backgroundColor: "#1e1e2e",
+    border: "1px solid #313244",
+    borderRadius: "8px",
+    padding: "1rem 1.25rem",
     marginBottom: "2rem",
+    display: "flex",
+    flexWrap: "wrap" as const,
+    gap: "0.75rem 2rem",
+  },
+  infoRow: {
+    display: "flex",
+    flexDirection: "column" as const,
+    gap: "2px",
+  },
+  infoLabel: {
+    fontSize: "0.65rem",
+    fontWeight: 700,
+    color: "#6c7086",
+    textTransform: "uppercase" as const,
+    letterSpacing: "0.07em",
+  },
+  infoValue: {
+    fontSize: "0.9rem",
+    color: "#cdd6f4",
   },
   status: { color: "#6c7086" },
   error: { color: "#f38ba8" },

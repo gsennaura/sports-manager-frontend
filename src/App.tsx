@@ -1,5 +1,5 @@
 import { BrowserRouter, Routes, Route } from "react-router-dom";
-import { listChampionships, getChampionshipDetail, listTeams, createTeam, getTeamMatches } from "./infrastructure/composition";
+import { listChampionships, getChampionshipDetail, listTeams, getTeamMatches, getTeamDetail } from "./infrastructure/composition";
 import { HomePage } from "@presentation/pages/HomePage";
 import { ChampionshipsPage } from "@presentation/pages/ChampionshipsPage";
 import { ChampionshipDetailPage } from "@presentation/pages/ChampionshipDetailPage";
@@ -13,8 +13,8 @@ export function App() {
         <Route path="/" element={<HomePage />} />
         <Route path="/campeonatos" element={<ChampionshipsPage listChampionships={listChampionships} />} />
         <Route path="/campeonatos/:id" element={<ChampionshipDetailPage getChampionshipDetail={getChampionshipDetail} />} />
-        <Route path="/times" element={<TeamsPage listTeams={listTeams} createTeam={createTeam} />} />
-        <Route path="/times/:id" element={<TeamDetailPage getTeamMatches={getTeamMatches} />} />
+        <Route path="/times" element={<TeamsPage listTeams={listTeams} />} />
+        <Route path="/times/:id" element={<TeamDetailPage getTeamMatches={getTeamMatches} getTeamDetail={getTeamDetail} />} />
       </Routes>
     </BrowserRouter>
   );

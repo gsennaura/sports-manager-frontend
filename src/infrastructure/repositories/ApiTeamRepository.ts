@@ -2,15 +2,36 @@ import type { Team } from "@domain/entities/Team";
 import type { TeamMatch } from "@domain/entities/TeamMatch";
 import type { TeamRepository } from "@domain/repositories/TeamRepository";
 
+type RawTeam = { id: string; name: string; city_id: string; sport_id: string; venue_id: string | null; president: string | null; founded_at: string | null };
+
 export class ApiTeamRepository implements TeamRepository {
   constructor(private readonly baseUrl: string) {}
 
   async listAll(): Promise<Team[]> {
-    const response = await fetch(`${this.baseUrl}/teams`);
-    if (!response.ok) {
-      throw new Error(`Falha ao buscar times: ${response.status}`);
+    const [teamsResp, citiesResp, venuesResp] = await Promise.all([
+      fetch(`${this.baseUrl}/teams`),
+      fetch(`${this.baseUrl}/cities`),
+      fetch(`${this.baseUrl}/venues`),
+    ]);
+    if (!teamsResp.ok) {
+      throw new Error(`Falha ao buscar times: ${teamsResp.status}`);
     }
-    return response.json() as Promise<Team[]>;
+    const teams = await teamsResp.json() as RawTeam[];
+    const cityMap = new Map<string, string>();
+    if (citiesResp.ok) {
+      const cities = await citiesResp.json() as Array<{ id: string; name: string }>;
+      for (const c of cities) cityMap.set(c.id, c.name);
+    }
+    const venueMap = new Map<string, string>();
+    if (venuesResp.ok) {
+      const venues = await venuesResp.json() as Array<{ id: string; name: string }>;
+      for (const v of venues) venueMap.set(v.id, v.name);
+    }
+    return teams.map((t) => ({
+      ...t,
+      city_name: cityMap.get(t.city_id) ?? "–",
+      venue_name: t.venue_id ? (venueMap.get(t.venue_id) ?? null) : null,
+    }));
   }
 
   async create(name: string): Promise<Team> {
@@ -30,5 +51,30 @@ export class ApiTeamRepository implements TeamRepository {
     const response = await fetch(`${this.baseUrl}/teams/${teamId}/matches`);
     if (!response.ok) throw new Error(`Falha ao buscar partidas do time: ${response.status}`);
     return response.json() as Promise<TeamMatch[]>;
+  }
+
+  async getDetail(id: string): Promise<Team> {
+    const [teamResp, citiesResp, venuesResp] = await Promise.all([
+      fetch(`${this.baseUrl}/teams/${id}`),
+      fetch(`${this.baseUrl}/cities`),
+      fetch(`${this.baseUrl}/venues`),
+    ]);
+    if (!teamResp.ok) throw new Error(`Time não encontrado: ${teamResp.status}`);
+    const team = await teamResp.json() as RawTeam;
+    const cityMap = new Map<string, string>();
+    if (citiesResp.ok) {
+      const cities = await citiesResp.json() as Array<{ id: string; name: string }>;
+      for (const c of cities) cityMap.set(c.id, c.name);
+    }
+    const venueMap = new Map<string, string>();
+    if (venuesResp.ok) {
+      const venues = await venuesResp.json() as Array<{ id: string; name: string }>;
+      for (const v of venues) venueMap.set(v.id, v.name);
+    }
+    return {
+      ...team,
+      city_name: cityMap.get(team.city_id) ?? "–",
+      venue_name: team.venue_id ? (venueMap.get(team.venue_id) ?? null) : null,
+    };
   }
 }
