@@ -5,6 +5,19 @@ import type { GetTeamDetail } from "@application/use_cases/GetTeamDetail";
 import type { Team } from "@domain/entities/Team";
 import type { TeamMatch } from "@domain/entities/TeamMatch";
 
+const categoryLabel: Record<string, string> = {
+  amador: "Amador",
+  profissional: "Profissional",
+  base: "Base",
+  junior: "Júnior",
+  juvenil: "Juvenil",
+  infantil: "Infantil",
+  mirim: "Mirim",
+  "pre-mirim": "Pré-Mirim",
+  master: "Master",
+  universitaria: "Universitária",
+};
+
 interface TeamDetailPageProps {
   getTeamMatches: GetTeamMatches;
   getTeamDetail: GetTeamDetail;
@@ -69,6 +82,18 @@ export function TeamDetailPage({ getTeamMatches, getTeamDetail }: TeamDetailPage
               {team.venue_name && <InfoRow label="Estádio / Arena" value={team.venue_name} />}
               {team.president && <InfoRow label="Presidente" value={team.president} />}
               {team.founded_at && <InfoRow label="Fundação" value={formatDate(team.founded_at)} />}
+              {team.category && (
+                <div style={styles.infoRow}>
+                  <span style={styles.infoLabel}>Categoria</span>
+                  <span style={styles.infoValue}>{categoryLabel[team.category] ?? team.category}</span>
+                </div>
+              )}
+              {team.club_id && team.club_name && (
+                <div style={styles.infoRow}>
+                  <span style={styles.infoLabel}>Clube</span>
+                  <Link to={`/clubes/${team.club_id}`} style={styles.clubLink}>{team.club_name}</Link>
+                </div>
+              )}
             </div>
           )}
 
@@ -273,6 +298,12 @@ const styles: Record<string, React.CSSProperties> = {
   infoValue: {
     fontSize: "0.9rem",
     color: "#cdd6f4",
+  },
+  clubLink: {
+    fontSize: "0.9rem",
+    color: "#89b4fa",
+    textDecoration: "none",
+    fontWeight: 600,
   },
   status: { color: "#6c7086" },
   error: { color: "#f38ba8" },

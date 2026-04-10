@@ -7,14 +7,28 @@ export function HomePage() {
       <p style={styles.subtitle}>Gerencie seus campeonatos e times</p>
 
       <nav style={styles.nav}>
-        <Link to="/campeonatos" style={styles.card}>
-          <span style={styles.cardTitle}>Campeonatos</span>
-          <span style={styles.cardDesc}>Ver e gerenciar campeonatos</span>
+        <Link to="/ligas" style={{ ...styles.card, ...styles.cardHighlight }}>
+          <span style={styles.cardEmoji}>🏆</span>
+          <div>
+            <span style={styles.cardTitle}>Ligas</span>
+            <span style={styles.cardDesc}>Explore ligas e seus campeonatos por ano</span>
+          </div>
         </Link>
 
-        <Link to="/times" style={styles.card}>
-          <span style={styles.cardTitle}>Times</span>
-          <span style={styles.cardDesc}>Ver e gerenciar times</span>
+        <Link to="/campeonatos" style={styles.card}>
+          <span style={styles.cardEmoji}>📋</span>
+          <div>
+            <span style={styles.cardTitle}>Todos os Campeonatos</span>
+            <span style={styles.cardDesc}>Listagem completa de todos os campeonatos</span>
+          </div>
+        </Link>
+
+        <Link to="/clubes" style={styles.card}>
+          <span style={styles.cardEmoji}>👕</span>
+          <div>
+            <span style={styles.cardTitle}>Clubes</span>
+            <span style={styles.cardDesc}>Ver clubes e seus times</span>
+          </div>
         </Link>
       </nav>
     </main>
@@ -40,26 +54,37 @@ const styles: Record<string, React.CSSProperties> = {
   nav: {
     display: "flex",
     flexDirection: "column",
-    gap: "1rem",
+    gap: "0.75rem",
   },
   card: {
     display: "flex",
-    flexDirection: "column",
-    gap: "0.25rem",
-    padding: "1.5rem",
+    alignItems: "center",
+    gap: "1rem",
+    padding: "1.25rem 1.5rem",
     backgroundColor: "#1e1e2e",
     border: "1px solid #313244",
     borderRadius: "8px",
     textDecoration: "none",
     color: "inherit",
   },
+  cardHighlight: {
+    border: "1px solid #2a3a6a",
+    backgroundColor: "#1a1f3a",
+  },
+  cardEmoji: {
+    fontSize: "1.5rem",
+    flexShrink: 0,
+  },
   cardTitle: {
-    fontSize: "1.125rem",
+    display: "block",
+    fontSize: "1.05rem",
     fontWeight: 600,
     color: "#cdd6f4",
+    marginBottom: "0.2rem",
   },
   cardDesc: {
-    fontSize: "0.875rem",
+    display: "block",
+    fontSize: "0.825rem",
     color: "#6c7086",
   },
 };

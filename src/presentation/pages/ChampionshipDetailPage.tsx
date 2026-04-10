@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { Link, useParams } from "react-router-dom";
+import { Link, useLocation, useParams } from "react-router-dom";
 import type { GetChampionshipDetail } from "@application/use_cases/GetChampionshipDetail";
 import type { ChampionshipDetail, GroupDetail, MatchEntry, StandingEntry } from "@domain/entities/ChampionshipDetail";
 import { useChampionshipDetail } from "@presentation/hooks/useChampionshipDetail";
@@ -10,23 +10,56 @@ interface ChampionshipDetailPageProps {
 
 export function ChampionshipDetailPage({ getChampionshipDetail }: ChampionshipDetailPageProps) {
   const { id } = useParams<{ id: string }>();
+  const location = useLocation();
+  const fromLeague = (location.state as { fromLeague?: boolean } | null)?.fromLeague;
   const { detail, loading, error } = useChampionshipDetail(getChampionshipDetail, id!);
+
+  const backLink = fromLeague && detail?.league_id
+    ? `/ligas/${detail.league_id}`
+    : "/campeonatos";
+  const backLabel = fromLeague && detail?.league_id ? "← Liga" : "← Campeonatos";
+
+  const levelLabel: Record<string, string> = {
+    amador: "Amador",
+    universitario: "Universitário",
+    profissional: "Profissional",
+  };
+  const levelColor: Record<string, React.CSSProperties> = {
+    amador: { color: "#a6e3a1", backgroundColor: "#1a2e1f", border: "1px solid #2a4a2f" },
+    universitario: { color: "#89b4fa", backgroundColor: "#1a1f3a", border: "1px solid #2a3a6a" },
+    profissional: { color: "#f9e2af", backgroundColor: "#2e2a1a", border: "1px solid #4a3a2a" },
+  };
 
   return (
     <main style={styles.page}>
-      <Link to="/campeonatos" style={styles.back}>← Campeonatos</Link>
+      <Link to={backLink} style={styles.back}>{backLabel}</Link>
 
       {loading && <p style={styles.status}>Carregando...</p>}
       {error && <p style={styles.error}>{error}</p>}
 
       {detail && (
         <>
-          <h1 style={styles.title}>{detail.name}</h1>
+          <div style={styles.champHeader}>
+            <div>
+              <h1 style={styles.title}>
+                {detail.nickname ?? detail.name}
+              </h1>
+              {detail.nickname && (
+                <p style={styles.champFullName}>{detail.name}</p>
+              )}
+            </div>
+            <div style={styles.champBadges}>
+              {detail.level && (
+                <span style={{ ...styles.badge, ...levelColor[detail.level] }}>
+                  {levelLabel[detail.level] ?? detail.level}
+                </span>
+              )}
+              <span style={styles.yearBadge}>{detail.year}</span>
+              <span style={styles.scopeBadge}>{detail.scope}</span>
+            </div>
+          </div>
 
-          {[
-            ...[...detail.phases].filter((p) => p.phase_type === "knockout").reverse(),
-            ...[...detail.phases].filter((p) => p.phase_type !== "knockout"),
-          ].map((phase) => (
+          {[...detail.phases].sort((a, b) => b.order - a.order).map((phase) => (
             <section key={phase.id} style={styles.phase}>
               <h2 style={styles.phaseTitle}>{phase.name}</h2>
               <div style={styles.groupsGrid}>
@@ -267,6 +300,46 @@ const styles: Record<string, React.CSSProperties> = {
   },
   status: { color: "#6c7086" },
   error: { color: "#f38ba8" },
+  champHeader: {
+    marginBottom: "2rem",
+  },
+  champFullName: {
+    fontSize: "0.85rem",
+    color: "#6c7086",
+    margin: "0.25rem 0 0 0",
+  },
+  champBadges: {
+    display: "flex",
+    flexWrap: "wrap" as const,
+    gap: "0.4rem",
+    marginTop: "0.75rem",
+  },
+  badge: {
+    fontSize: "0.7rem",
+    fontWeight: 700,
+    borderRadius: "4px",
+    padding: "0.2rem 0.6rem",
+    letterSpacing: "0.04em",
+    whiteSpace: "nowrap" as const,
+  },
+  yearBadge: {
+    fontSize: "0.7rem",
+    fontWeight: 700,
+    color: "#cdd6f4",
+    backgroundColor: "#313244",
+    borderRadius: "4px",
+    padding: "0.2rem 0.6rem",
+    whiteSpace: "nowrap" as const,
+  },
+  scopeBadge: {
+    fontSize: "0.7rem",
+    color: "#45475a",
+    backgroundColor: "#181825",
+    border: "1px solid #313244",
+    borderRadius: "4px",
+    padding: "0.2rem 0.6rem",
+    whiteSpace: "nowrap" as const,
+  },
   phase: {
     marginBottom: "2.5rem",
   },

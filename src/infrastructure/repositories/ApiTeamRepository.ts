@@ -2,16 +2,29 @@ import type { Team } from "@domain/entities/Team";
 import type { TeamMatch } from "@domain/entities/TeamMatch";
 import type { TeamRepository } from "@domain/repositories/TeamRepository";
 
-type RawTeam = { id: string; name: string; city_id: string; sport_id: string; venue_id: string | null; president: string | null; founded_at: string | null };
+type RawTeam = {
+  id: string;
+  name: string;
+  city_id: string;
+  sport_id: string;
+  venue_id: string | null;
+  president: string | null;
+  founded_at: string | null;
+  club_id: string | null;
+  category: string | null;
+};
+
+type RawClub = { id: string; name: string };
 
 export class ApiTeamRepository implements TeamRepository {
   constructor(private readonly baseUrl: string) {}
 
   async listAll(): Promise<Team[]> {
-    const [teamsResp, citiesResp, venuesResp] = await Promise.all([
+    const [teamsResp, citiesResp, venuesResp, clubsResp] = await Promise.all([
       fetch(`${this.baseUrl}/teams`),
       fetch(`${this.baseUrl}/cities`),
       fetch(`${this.baseUrl}/venues`),
+      fetch(`${this.baseUrl}/clubs/`),
     ]);
     if (!teamsResp.ok) {
       throw new Error(`Falha ao buscar times: ${teamsResp.status}`);
@@ -27,10 +40,16 @@ export class ApiTeamRepository implements TeamRepository {
       const venues = await venuesResp.json() as Array<{ id: string; name: string }>;
       for (const v of venues) venueMap.set(v.id, v.name);
     }
+    const clubMap = new Map<string, string>();
+    if (clubsResp.ok) {
+      const clubs = await clubsResp.json() as RawClub[];
+      for (const c of clubs) clubMap.set(c.id, c.name);
+    }
     return teams.map((t) => ({
       ...t,
       city_name: cityMap.get(t.city_id) ?? "–",
       venue_name: t.venue_id ? (venueMap.get(t.venue_id) ?? null) : null,
+      club_name: t.club_id ? (clubMap.get(t.club_id) ?? null) : null,
     }));
   }
 
@@ -54,10 +73,11 @@ export class ApiTeamRepository implements TeamRepository {
   }
 
   async getDetail(id: string): Promise<Team> {
-    const [teamResp, citiesResp, venuesResp] = await Promise.all([
+    const [teamResp, citiesResp, venuesResp, clubsResp] = await Promise.all([
       fetch(`${this.baseUrl}/teams/${id}`),
       fetch(`${this.baseUrl}/cities`),
       fetch(`${this.baseUrl}/venues`),
+      fetch(`${this.baseUrl}/clubs/`),
     ]);
     if (!teamResp.ok) throw new Error(`Time não encontrado: ${teamResp.status}`);
     const team = await teamResp.json() as RawTeam;
@@ -71,10 +91,16 @@ export class ApiTeamRepository implements TeamRepository {
       const venues = await venuesResp.json() as Array<{ id: string; name: string }>;
       for (const v of venues) venueMap.set(v.id, v.name);
     }
+    const clubMap = new Map<string, string>();
+    if (clubsResp.ok) {
+      const clubs = await clubsResp.json() as RawClub[];
+      for (const c of clubs) clubMap.set(c.id, c.name);
+    }
     return {
       ...team,
       city_name: cityMap.get(team.city_id) ?? "–",
       venue_name: team.venue_id ? (venueMap.get(team.venue_id) ?? null) : null,
+      club_name: team.club_id ? (clubMap.get(team.club_id) ?? null) : null,
     };
   }
 }
