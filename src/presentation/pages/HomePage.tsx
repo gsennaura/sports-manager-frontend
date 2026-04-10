@@ -23,11 +23,11 @@ export function HomePage() {
           </div>
         </Link>
 
-        <Link to="/times" style={styles.card}>
+        <Link to="/clubes" style={styles.card}>
           <span style={styles.cardEmoji}>👕</span>
           <div>
-            <span style={styles.cardTitle}>Times</span>
-            <span style={styles.cardDesc}>Ver e gerenciar times</span>
+            <span style={styles.cardTitle}>Clubes</span>
+            <span style={styles.cardDesc}>Ver clubes e seus times</span>
           </div>
         </Link>
       </nav>

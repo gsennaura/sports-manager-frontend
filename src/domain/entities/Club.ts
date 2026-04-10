@@ -1,14 +1,10 @@
-export interface Team {
+export interface Club {
   id: string;
   name: string;
   city_id: string;
   city_name: string;
-  sport_id: string;
+  president: string | null;
   venue_id: string | null;
   venue_name: string | null;
-  president: string | null;
   founded_at: string | null;
-  club_id: string | null;
-  club_name: string | null;
-  category: string | null;
 }

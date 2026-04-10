@@ -35,7 +35,7 @@ export class ApiLeagueRepository implements LeagueRepository {
 
   async getById(id: string): Promise<League> {
     const [leagueResp, citiesResp] = await Promise.all([
-      fetch(`${this.baseUrl}/leagues/${id}`),
+      fetch(`${this.baseUrl}/leagues/${id}/`),
       fetch(`${this.baseUrl}/cities`),
     ]);
     if (!leagueResp.ok) throw new Error(`Liga não encontrada: ${leagueResp.status}`);

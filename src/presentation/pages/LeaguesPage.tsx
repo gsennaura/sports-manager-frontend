@@ -1,4 +1,3 @@
-import { Link } from "react-router-dom";
 import type { ListLeagues } from "@application/use_cases/ListLeagues";
 import { LeagueCard } from "@presentation/components/LeagueCard";
 import { useLeagues } from "@presentation/hooks/useLeagues";
@@ -12,8 +11,7 @@ export function LeaguesPage({ listLeagues }: LeaguesPageProps) {
 
   return (
     <main style={styles.page}>
-      <Link to="/" style={styles.back}>← Início</Link>
-      <h1 style={styles.title}>Ligas</h1>
+      <h1 style={styles.title}>Sports Manager</h1>
       <p style={styles.subtitle}>Selecione uma liga para ver seus campeonatos</p>
 
       {loading && <p style={styles.status}>Carregando...</p>}
@@ -39,13 +37,6 @@ const styles: Record<string, React.CSSProperties> = {
     maxWidth: "640px",
     margin: "0 auto",
     padding: "3rem 1.5rem",
-  },
-  back: {
-    display: "inline-block",
-    color: "#89b4fa",
-    textDecoration: "none",
-    fontSize: "0.9rem",
-    marginBottom: "2rem",
   },
   title: {
     fontSize: "1.75rem",

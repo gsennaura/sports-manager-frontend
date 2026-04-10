@@ -59,10 +59,7 @@ export function ChampionshipDetailPage({ getChampionshipDetail }: ChampionshipDe
             </div>
           </div>
 
-          {[
-            ...[...detail.phases].filter((p) => p.phase_type === "knockout").reverse(),
-            ...[...detail.phases].filter((p) => p.phase_type !== "knockout"),
-          ].map((phase) => (
+          {[...detail.phases].sort((a, b) => b.order - a.order).map((phase) => (
             <section key={phase.id} style={styles.phase}>
               <h2 style={styles.phaseTitle}>{phase.name}</h2>
               <div style={styles.groupsGrid}>
