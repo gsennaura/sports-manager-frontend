@@ -47,5 +47,10 @@ export interface PhaseDetail {
 export interface ChampionshipDetail {
   id: string;
   name: string;
+  nickname: string | null;
+  year: number;
+  scope: string;
+  level: string | null;
+  league_id: string | null;
   phases: PhaseDetail[];
 }

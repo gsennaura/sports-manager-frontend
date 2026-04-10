@@ -13,7 +13,11 @@ export class ApiChampionshipRepository implements ChampionshipRepository {
     if (!champsResp.ok) {
       throw new Error(`Falha ao buscar campeonatos: ${champsResp.status}`);
     }
-    const champs = await champsResp.json() as Array<{ id: string; name: string; city_id: string }>;
+    const champs = await champsResp.json() as Array<{
+      id: string; name: string; nickname: string | null;
+      city_id: string; sport_id: string; year: number;
+      scope: string; level: string | null; league_id: string | null;
+    }>;
     const cityMap = new Map<string, string>();
     if (citiesResp.ok) {
       const cities = await citiesResp.json() as Array<{ id: string; name: string }>;
@@ -34,7 +38,10 @@ export class ApiChampionshipRepository implements ChampionshipRepository {
     if (!champResp.ok) throw new Error(`Campeonato não encontrado: ${champResp.status}`);
     if (!phasesResp.ok) throw new Error(`Falha ao buscar fases: ${phasesResp.status}`);
 
-    const champ = await champResp.json() as { id: string; name: string };
+    const champ = await champResp.json() as {
+      id: string; name: string; nickname: string | null;
+      year: number; scope: string; level: string | null; league_id: string | null;
+    };
     const phases = await phasesResp.json() as Array<{ id: string; name: string; phase_type: string }>;
 
     // team_id → venue_id and venue_id → venue_name maps for resolving match venues
@@ -99,6 +106,15 @@ export class ApiChampionshipRepository implements ChampionshipRepository {
       })
     );
 
-    return { id: champ.id, name: champ.name, phases: phasesWithGroups };
+    return {
+      id: champ.id,
+      name: champ.name,
+      nickname: champ.nickname ?? null,
+      year: champ.year,
+      scope: champ.scope,
+      level: champ.level ?? null,
+      league_id: champ.league_id ?? null,
+      phases: phasesWithGroups,
+    };
   }
 }
